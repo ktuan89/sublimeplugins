@@ -6,15 +6,24 @@ import codecs
 from os.path import expanduser
 
 from .common.utils import wait_for_view_to_be_loaded_then_do
+from .common.utils import git_path_for_window
 
 def grepSettings():
     return sublime.load_settings('Grep.sublime-settings')
 
-def grepPath():
-    return grepSettings().get('git_path')
+def grepPath(window):
+    path = grepSettings().get('git_path')
+    if path == "<interpolate_from_open_folder>":
+        return git_path_for_window(window)
+    else:
+        return path
 
-def prefixPath():
-    return grepSettings().get('prefix_path')
+def prefixPath(window):
+    prefix = grepSettings().get('prefix_path')
+    if prefix == "<same_as_path>":
+        return grepPath(window)
+    else:
+        return prefix
 
 def grepFormatStr():
     return grepSettings().get('grep_format_str')
@@ -50,16 +59,15 @@ class GrepCommand(sublime_plugin.WindowCommand):
             self.search(grep_str)
 
     def search(self, query):
-
         if self.show_in_view:
             command = grepFormatStr().format(
-                grepPath(),
+                grepPath(self.window),
                 pipes.quote(query)
             )
         else:
             # we need quick results
             command = quickGrepFormatStr().format(
-                grepPath(),
+                grepPath(self.window),
                 pipes.quote(query)
             )
 
@@ -143,7 +151,7 @@ class OpenCommand(sublime_plugin.WindowCommand):
 
 def open_result(result, window):
     if result.path:
-        view = window.open_file(prefixPath() + result.path)
+        view = window.open_file(prefixPath(window) + result.path)
 
         def handle_view():
             if result.row is not None:

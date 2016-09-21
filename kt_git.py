@@ -5,12 +5,17 @@ import codecs
 from os.path import expanduser
 
 from .common.utils import wait_for_view_to_be_loaded_then_do
+from .common.utils import git_path_for_window
 
 def gitSettings():
     return sublime.load_settings('Git.sublime-settings')
 
-def gitPath():
-    return gitSettings().get('path')
+def gitPath(window):
+    path = gitSettings().get('path')
+    if path == "<interpolate_from_open_folder>":
+        return git_path_for_window(window)
+    else:
+        return path
 
 def tmpFile():
     return gitSettings().get('tmp_file')
@@ -48,19 +53,19 @@ class GitBase(sublime_plugin.WindowCommand):
 
 class GitShow(GitBase):
     def gitCommand(self):
-        return "cd {0};git show >{1}".format(gitPath(), tmpFile())
+        return "cd '{0}';git show >{1}".format(gitPath(self.window), tmpFile())
     def gitName(self):
         return "GitShow"
 
 class GitStatus(GitBase):
     def gitCommand(self):
-        return "cd {0};git status >{1}".format(gitPath(), tmpFile())
+        return "cd '{0}';git status >{1}".format(gitPath(self.window), tmpFile())
     def gitName(self):
         return "GitStatus"
 
 class GitDiff(GitBase):
     def gitCommand(self):
-        return "cd {0};git diff >{1}".format(gitPath(), tmpFile())
+        return "cd '{0}';git diff >{1}".format(gitPath(self.window), tmpFile())
     def gitName(self):
         return "GitDiff"
 
@@ -109,7 +114,7 @@ class GitDiffOpen(sublime_plugin.WindowCommand):
             matches = re.search('@@.*\+(.*),(.*) @@', position_str)
             extract_position = (int(matches.group(1)) - 1) + (line_count - 1)
 
-            new_view = self.window.open_file(gitPath() + file_name)
+            new_view = self.window.open_file(gitPath(self.window) + file_name)
 
             def handle_view():
                 new_position = new_view.text_point(extract_position, line_offset)
@@ -130,7 +135,7 @@ class GitListModifiedFiles(sublime_plugin.WindowCommand):
     files = []
 
     def run(self):
-        command = "cd {0};git status".format(gitPath())
+        command = "cd '{0}';git status".format(gitPath(self.window))
         p = Popen(command, shell=True, close_fds=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
         p.wait()
@@ -154,7 +159,7 @@ class GitListModifiedFiles(sublime_plugin.WindowCommand):
     def tab_selected(self, selected):
         if selected > -1:
             file_name = self.files[selected]
-            self.window.open_file(gitPath() + file_name)
+            self.window.open_file(gitPath(self.window) + file_name)
             pass
 
 class GitAdd(sublime_plugin.WindowCommand):
@@ -166,7 +171,7 @@ class GitAdd(sublime_plugin.WindowCommand):
         if file_name is None:
             return
         sublime.status_message("git: add ...")
-        command = ("cd {0};git add " + file_name).format(gitPath())
+        command = ("cd '{0}';git add " + file_name).format(gitPath(self.window))
         p = Popen(command, shell=True, close_fds=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
         sublime.status_message("git: added")
@@ -180,7 +185,7 @@ class GitListBranches(sublime_plugin.WindowCommand):
     branches = []
 
     def run(self):
-        command = "cd {0};git branch".format(gitPath())
+        command = "cd '{0}';git branch".format(gitPath(self.window))
         p = Popen(command, shell=True, close_fds=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
         p.wait()
@@ -204,7 +209,7 @@ class GitListBranches(sublime_plugin.WindowCommand):
     def tab_selected(self, selected):
         if selected > -1:
             branch = self.branches[selected]
-            command = ("cd {0};git checkout " + branch).format(gitPath())
+            command = ("cd '{0}';git checkout " + branch).format(gitPath(self.window))
             p = Popen(command, shell=True, close_fds=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
             p.wait()
             sublime.status_message("git: checkout " + branch)
