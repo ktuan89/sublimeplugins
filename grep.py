@@ -5,6 +5,8 @@ from subprocess import Popen, PIPE
 import codecs
 from os.path import expanduser
 
+from .common.utils import wait_for_view_to_be_loaded_then_do
+
 def grepSettings():
     return sublime.load_settings('Grep.sublime-settings')
 
@@ -138,16 +140,6 @@ class OpenCommand(sublime_plugin.WindowCommand):
                 text = view.substr(line)
                 open_result(SearchResult(text), self.window)
                 break
-
-def wait_for_view_to_be_loaded_then_do(view, func):
-
-    def wait_for_view_to_be_loaded_then_do_exp(view, func, timeout):
-        if view.is_loading():
-            sublime.set_timeout(lambda: wait_for_view_to_be_loaded_then_do(view, func), timeout * 2)
-            return
-        sublime.set_timeout(lambda: func(), timeout * 2)
-
-    wait_for_view_to_be_loaded_then_do_exp(view, func, 10)
 
 def open_result(result, window):
     if result.path:
