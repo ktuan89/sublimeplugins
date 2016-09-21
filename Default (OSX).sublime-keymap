@@ -1,4 +1,7 @@
 [
+    { "keys": ["super+shift+t"], "command": "grep", "args": {"ask": true,  "show_in_view": true} },
+    { "keys": ["ctrl+enter"],    "command": "grep", "args": {"ask": false, "show_in_view": false} },
+
     { "keys": ["super+shift+j"], "command": "reveal_in_side_bar" },
     { "keys": ["ctrl+f"], "command": "filter_text"},
     { "keys": ["ctrl+0"], "command": "open_in_finder"},
