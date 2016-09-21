@@ -1,4 +1,5 @@
 import sublime, sublime_plugin
+import re
 
 class ReplaceAllAppearances(sublime_plugin.WindowCommand):
 

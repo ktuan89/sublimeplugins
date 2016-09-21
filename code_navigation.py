@@ -1,4 +1,5 @@
 import sublime, sublime_plugin
+import re
 
 kt_last_same_word = ""
 
