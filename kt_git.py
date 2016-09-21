@@ -2,6 +2,7 @@ import sublime, sublime_plugin
 import re
 from subprocess import Popen, PIPE
 import codecs
+from os.path import expanduser
 
 def wait_for_view_to_be_loaded_then_do(view, func):
 
@@ -9,7 +10,7 @@ def wait_for_view_to_be_loaded_then_do(view, func):
         if view.is_loading():
             sublime.set_timeout(lambda: wait_for_view_to_be_loaded_then_do(view, func), timeout * 2)
             return
-        func()
+        sublime.set_timeout(lambda: func(), timeout * 2)
 
     wait_for_view_to_be_loaded_then_do_exp(view, func, 10)
 
@@ -35,7 +36,7 @@ class GitBase(sublime_plugin.WindowCommand):
 
         p.wait()
 
-        with codecs.open(tmpFile(), 'r', encoding='utf-8') as f:
+        with codecs.open(expanduser(tmpFile()), 'r', encoding='utf-8') as f:
             lines = f.readlines()
             stdout = ''.join(lines)
 
@@ -128,7 +129,7 @@ class GitDiffOpen(sublime_plugin.WindowCommand):
             pass # happy dancing
         elif view.name().startswith("grep:"):
             # deps: going to add this fallback soon
-            self.window.run_command('open', {"skip_dialog": True})
+            self.window.run_command('open')
             pass
         pass
 
