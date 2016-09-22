@@ -103,7 +103,7 @@ class GrepCommand(sublime_plugin.WindowCommand):
         if self.show_in_view:
             results_view = self.window.new_file()
             results_view.set_scratch(True)
-            results_view.set_syntax_file('Packages/C++/C++.tmLanguage')
+            results_view.set_syntax_file('Packages/sublimeplugins/Grep.sublime-syntax')
             # git_diff_open will fallback when the name starts with "grep:"
             results_view.set_name('grep: ' + query)
 

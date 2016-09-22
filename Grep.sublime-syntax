@@ -1,0 +1,44 @@
+%YAML 1.2
+---
+name: Grep
+file_extensions: []
+scope: text.search
+
+contexts:
+  main:
+    - match: ^([^:]+(\/[^:]+))[:](\d+)([:])
+      captures:
+        1: comment.line.grep
+        2: entity.name.function.grep
+        3: constant.numeric.grep
+
+    - match: \b(if|else|for|while|in|case|switch|return)\b
+      scope: keyword.control.grep
+    - match: \b(class|struct|enum|protocol|func)\b
+      scope: storage.type.function.grep
+    - match: \b(private|public|internal|override)\b
+      scope: keyword.control.grep
+
+    - match: '//'
+      push: comment_inline
+
+    - match: (\.|=|\+|-|\*|\/|\:|&|\|)
+      scope: keyword.operator.grep
+
+    - match: \b[0-9]+\b
+      scope: constant.numeric.grep
+
+    - match: '"'
+      push: string_double_quote
+
+  string_double_quote:
+    - meta_scope: string.grep
+    - match: '"'
+      pop: true
+
+  comment_inline:
+    - meta_scope: comment.line.grep
+    - match: $
+      pop: true
+
+
