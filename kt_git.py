@@ -114,7 +114,7 @@ class GitDiffOpen(sublime_plugin.WindowCommand):
             matches = re.search('@@.*\+(.*),(.*) @@', position_str)
             extract_position = (int(matches.group(1)) - 1) + (line_count - 1)
 
-            new_view = self.window.open_file(gitPath(self.window) + file_name)
+            new_view = self.window.open_file(gitPath(self.window) + file_name.strip())
 
             def handle_view():
                 new_position = new_view.text_point(extract_position, line_offset)
