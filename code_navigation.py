@@ -172,8 +172,6 @@ class JumpToAppearances(sublime_plugin.WindowCommand):
             the_view = self.open_views[selected]
             the_position = self.open_positions[selected]
             self.window.focus_view(the_view)
-            the_view.show_at_center(the_position)
-            the_view.sel().clear()
-            the_view.sel().add(sublime.Region(the_position, the_position))
+            the_view.run_command('show_view_at_position', {"position": the_position})
 
         return selected

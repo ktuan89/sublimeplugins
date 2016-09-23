@@ -158,9 +158,7 @@ def open_result(result, window):
                 row = result.row - 1
                 column = 0
                 point = view.text_point(row, column)
-                view.show_at_center(point)
-                view.sel().clear()
-                view.sel().add(sublime.Region(point, point))
+                view.run_command('show_view_at_position', {"position": point})
 
         wait_for_view_to_be_loaded_then_do(view, handle_view)
 

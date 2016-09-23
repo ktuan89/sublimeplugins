@@ -118,9 +118,7 @@ class GitDiffOpen(sublime_plugin.WindowCommand):
 
             def handle_view():
                 new_position = new_view.text_point(extract_position, line_offset)
-                new_view.show_at_center(new_position)
-                new_view.sel().clear()
-                new_view.sel().add(sublime.Region(new_position, new_position))
+                new_view.run_command('show_view_at_position', {"position": new_position})
 
             wait_for_view_to_be_loaded_then_do(new_view, handle_view)
             pass # happy dancing
