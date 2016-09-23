@@ -30,4 +30,11 @@
     { "keys": ["super+shift+\\"], "command": "git_diff_open" },
 
     { "keys": ["super+shift+i"], "command": "in_folder_switcher"},
+
+    { "keys": ["super+1"], "command": "jump_to_kth_view", "args": {"index": 1}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["super+2"], "command": "jump_to_kth_view", "args": {"index": 2}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["super+3"], "command": "jump_to_kth_view", "args": {"index": 3}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["super+4"], "command": "jump_to_kth_view", "args": {"index": 4}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["super+5"], "command": "jump_to_kth_view", "args": {"index": 5}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["super+6"], "command": "jump_to_kth_view", "args": {"index": 6}, "context": [{"key": "setting.use_recent_file_navigation"}] },
 ]

@@ -94,6 +94,16 @@ class KeepTrackActiveViews(sublime_plugin.EventListener):
         if len(kt_active_view_list) > MAX_VIEWS:
             kt_active_view_list.pop()
 
+class JumpToKthView(sublime_plugin.WindowCommand):
+    def run(self, index):
+        view_id_to_view = {}
+        for v in self.window.views():
+            view_id_to_view[v.id()] = v
+        filtered_ids = [i for i in kt_active_view_list if i in view_id_to_view]
+        if index < len(filtered_ids):
+            self.window.focus_view(view_id_to_view[filtered_ids[index]])
+        pass
+
 class JumpToAppearances(sublime_plugin.WindowCommand):
 
     open_files = []
