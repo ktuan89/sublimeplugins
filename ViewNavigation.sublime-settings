@@ -1,3 +1,4 @@
 {
-    "xcodepath": "/Applications/Xcode.app"
+    "xcodepath": "/Applications/Xcode.app",
+    "terminalpath": "/Applications/Utilities/Terminal.app"
 }

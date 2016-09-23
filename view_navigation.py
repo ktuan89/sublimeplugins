@@ -9,6 +9,9 @@ def settings():
 def xcodePath():
     return settings().get('xcodepath')
 
+def terminalPath():
+    return settings().get('terminalpath')
+
 # this class is not my code, copied from internet
 class ExtendedSwitcherHaha(sublime_plugin.WindowCommand):
     # declarations
@@ -142,3 +145,8 @@ class OpenInFinder(sublime_plugin.TextCommand):
             #print self.view.file_name()
             #subprocess.call(["open", "-a", "/Applications/Xcode.app", self.view.file_name()])
             os.system("open '" + os.path.dirname(self.view.file_name()) + "'")
+
+class OpenInTerminal(sublime_plugin.TextCommand):
+    def run(self, edit):
+        if self.view.file_name() is not None:
+            os.system(("open -a {0} '" + os.path.dirname(self.view.file_name()) + "'").format(terminalPath()))
