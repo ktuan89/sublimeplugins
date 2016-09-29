@@ -1,8 +1,10 @@
 import sublime, sublime_plugin
+from sublime import Phantom, PhantomSet
 import re
 from subprocess import Popen, PIPE
 import codecs
 from os.path import expanduser
+import webbrowser
 
 from .common.utils import wait_for_view_to_be_loaded_then_do
 from .common.utils import git_path_for_window
@@ -16,6 +18,9 @@ def gitPath(window):
         return git_path_for_window(window)
     else:
         return path
+
+def gitWebBlameUrl():
+    return gitSettings().get('web_blame_url')
 
 def tmpFile():
     return gitSettings().get('tmp_file')
@@ -212,3 +217,81 @@ class GitListBranches(sublime_plugin.WindowCommand):
             p.wait()
             sublime.status_message("git: checkout " + branch)
             pass
+
+viewIdToPhantomSet = {}
+
+class GitBlame(sublime_plugin.TextCommand):
+    def run(self, edit):
+        path = gitPath(self.view.window())
+        current_path = self.view.file_name()
+        if current_path is not None and current_path.startswith(path):
+            remaining_path = current_path[len(path):]
+            command = ("cd '{0}';git blame --show-email '{1}' >{2}").format(path, remaining_path, tmpFile())
+            print(command)
+            p = Popen(command, shell=True, close_fds=True,
+                  stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+            p.wait()
+
+            with codecs.open(expanduser(tmpFile()), 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                line_count = 0
+
+                regions = self.view.lines(sublime.Region(0, self.view.size()))
+                phantoms = []
+
+                for line in lines:
+                    matches = re.search(r'^([0-9a-z]+).*?\(<(.*?)>', line)
+                    # print(line, ' ', matches)
+                    if matches is not None and line_count < len(regions):
+                        hash = matches.group(1)
+                        email = matches.group(2)
+                        at_position = email.find("@")
+                        if at_position != -1:
+                            email = email[:at_position]
+                        if len(email) > 10:
+                            email = email[:10]
+                        email = "{:*>10}".format(email)
+                        r = regions[line_count]
+                        phantom = Phantom(sublime.Region(r.begin(), r.begin()), "<a href='{0}'>{1}</a>".format(hash, email), sublime.LAYOUT_INLINE, lambda link: self.click(link) )
+                        phantoms.append(phantom)
+
+                    line_count = line_count + 1
+                global phantomSet
+                phantomSet = PhantomSet(self.view, 'git_blame')
+                phantomSet.update(phantoms)
+                global viewIdToPhantomSet
+                viewIdToPhantomSet[self.view.id()] = phantomSet
+
+    def click(self, link):
+        path = gitPath(self.view.window())
+        command = ("cd '{0}';git show {1} >{2}").format(path, link, tmpFile())
+        p = Popen(command, shell=True, close_fds=True,
+              stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+        p.wait()
+
+        with codecs.open(expanduser(tmpFile()), 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            for line in lines:
+                matches = re.search(r'Differential Revision: (http.*/D[0-9]+)', line)
+                if matches is not None:
+                    actual_link = matches.group(1)
+                    webbrowser.open_new(actual_link)
+
+class GitBlameRemove(sublime_plugin.TextCommand):
+    def run(self, edit):
+        global viewIdToPhantomSet
+        if self.view.id() in viewIdToPhantomSet:
+            viewIdToPhantomSet[self.view.id()].update([])
+            viewIdToPhantomSet.pop(self.view.id(), None)
+
+class GitBlameInBrowser(sublime_plugin.TextCommand):
+    def run(self, edit):
+        path = gitPath(self.view.window())
+        current_path = self.view.file_name()
+        if current_path is not None and current_path.startswith(path) and gitWebBlameUrl() is not None:
+            remaining_path = current_path[len(path):]
+            print(remaining_path,' ', current_path, ' ', path)
+            link = gitWebBlameUrl().format(remaining_path)
+            webbrowser.open_new(link)

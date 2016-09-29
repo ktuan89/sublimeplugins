@@ -26,7 +26,9 @@
     { "keys": ["ctrl+g", "g"], "command": "git_status"},
     { "keys": ["ctrl+g", "o"], "command": "git_list_modified_files"},
     { "keys": ["ctrl+g", "a"], "command": "git_add"},
-    { "keys": ["ctrl+g", "b"], "command": "git_list_branches"},
+    { "keys": ["ctrl+g", "b"], "command": "git_blame"},
+    { "keys": ["ctrl+g", "r"], "command": "git_blame_remove"},
+    { "keys": ["super+shift+b"], "command": "git_blame_in_browser" },
     { "keys": ["super+shift+\\"], "command": "git_diff_open" },
 
     { "keys": ["super+shift+i"], "command": "in_folder_switcher"},

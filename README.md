@@ -25,6 +25,9 @@ By default, the plugin takes a look at your first open folder and use git repo o
  3. `Command + Shift + \`: If you are viewing `git diff` or `git show` content, this shortcut brings you to the file you are viewing (under the current cursor) at the exact position.
  4. `Ctrl + g o`: If you are rebasing and having conflicts. It will list all files with conflicts and you can open these files in Sublime Text.
  5. `Ctrl + g a`: Mark the conflicted file as resolved. This is flaky for some reason so I usually use git command line directly.
+ 5. `Ctrl + g b`: Show blame inline with current view.
+ 6. `Ctrl + g r`: Remove the blame shown.
+ 7. `Command + Shift + b`: Show blame page on web browser, configurable using `web_blame_url` value in `Git.sublime-settings`.
 
 ### Grep
 
