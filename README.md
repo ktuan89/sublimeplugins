@@ -29,7 +29,7 @@ By default, the plugin takes a look at your first open folder and use git repo o
 ### Grep
 
  1. `Command + Shift + t`: Grep for a text. Currently I use `git grep` as my codebase is quite big. You can change settings in `Grep.sublime-settings`
- 2. `Command + Shift + \`: If you are viewing grep result file, this shortcut brings you to the file under the cursor. It's actually the same shortcut with number 3 of `Git Integration`.
+ 2. `Command + Shift + \`: If you are viewing grep result file (result of the previous command), this shortcut brings you to the file under the cursor. It's actually the same shortcut with number 3 of `Git Integration`. If you are selecting multiple lines, it will open all files under selection.
  3. `Ctrl + Enter`: Perform a "quick grep". It uses the current word under the cursor without asking you again. It looks for the word preceeded by word `class|protocol|struct|etc` so it always look for definition of the word in codebase. If there is only one result, it brings you to the file immediately. Take a look at `quick_grep_format_str` option in `Grep.sublime-settings` to see how it works.
 
 ### Navigation

@@ -143,14 +143,16 @@ class OpenCommand(sublime_plugin.WindowCommand):
         text = ""
         view = self.window.active_view()
         for sel in view.sel():
-            if sel.empty():
-                line = view.line(sel.begin())
-                text = view.substr(line)
-                open_result(SearchResult(text), self.window)
-                break
+            first_line = view.line(sel.begin())
+            last_line = view.line(sel.end())
+            text = view.substr(sublime.Region(first_line.begin(), last_line.end()))
+            text_arr = text.split('\n')
+            for text_line in text_arr:
+                open_result(SearchResult(text_line), self.window)
+
 
 def open_result(result, window):
-    if result.path:
+    if result.isValid():
         view = window.open_file(prefixPath(window) + result.path)
 
         def handle_view():
@@ -165,8 +167,12 @@ def open_result(result, window):
 
 class SearchResult():
     def __init__(self, line):
-        matches = re.search('([^:]+):(\d+):(.*)', line).groups()
-        self.path = matches[0]
-        self.row = int(matches[1])
-        self.content = matches[2]
+        self.search_result = re.search('([^:]+):(\d+):(.*)', line)
+        if self.search_result is not None:
+            matches = self.search_result.groups()
+            self.path = matches[0]
+            self.row = int(matches[1])
+            self.content = matches[2]
 
+    def isValid(self):
+        return self.search_result is not None and self.path is not None
