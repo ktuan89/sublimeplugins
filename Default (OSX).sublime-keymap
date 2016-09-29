@@ -37,4 +37,7 @@
     { "keys": ["super+4"], "command": "jump_to_kth_view", "args": {"index": 4}, "context": [{"key": "setting.use_recent_file_navigation"}] },
     { "keys": ["super+5"], "command": "jump_to_kth_view", "args": {"index": 5}, "context": [{"key": "setting.use_recent_file_navigation"}] },
     { "keys": ["super+6"], "command": "jump_to_kth_view", "args": {"index": 6}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["super+7"], "command": "jump_to_kth_view", "args": {"index": 7}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["super+8"], "command": "jump_to_kth_view", "args": {"index": 8}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["super+9"], "command": "jump_to_kth_view", "args": {"index": 9}, "context": [{"key": "setting.use_recent_file_navigation"}] },
 ]
