@@ -222,6 +222,7 @@ viewIdToPhantomSet = {}
 
 class GitBlame(sublime_plugin.TextCommand):
     def run(self, edit):
+        (viewport_x, viewport_y) = self.view.viewport_position()
         path = gitPath(self.view.window())
         current_path = self.view.file_name()
         if current_path is not None and current_path.startswith(path):
@@ -240,6 +241,8 @@ class GitBlame(sublime_plugin.TextCommand):
                 regions = self.view.lines(sublime.Region(0, self.view.size()))
                 phantoms = []
 
+                last_hash = None
+
                 for line in lines:
                     matches = re.search(r'^([0-9a-z]+).*?\(<(.*?)>', line)
                     # print(line, ' ', matches)
@@ -252,8 +255,17 @@ class GitBlame(sublime_plugin.TextCommand):
                         if len(email) > 10:
                             email = email[:10]
                         email = "{:*>10}".format(email)
+
+                        if hash == last_hash:
+                            email = "." * 10
+                            html = "<b>{0}</b>".format(email)
+                        else:
+                            html = "<a href='{0}'>{1}</a>".format(hash, email)
+
+                        last_hash = hash
+
                         r = regions[line_count]
-                        phantom = Phantom(sublime.Region(r.begin(), r.begin()), "<a href='{0}'>{1}</a>".format(hash, email), sublime.LAYOUT_INLINE, lambda link: self.click(link) )
+                        phantom = Phantom(sublime.Region(r.begin(), r.begin()), html, sublime.LAYOUT_INLINE, lambda link: self.click(link) )
                         phantoms.append(phantom)
 
                     line_count = line_count + 1
@@ -262,6 +274,7 @@ class GitBlame(sublime_plugin.TextCommand):
                 phantomSet.update(phantoms)
                 global viewIdToPhantomSet
                 viewIdToPhantomSet[self.view.id()] = phantomSet
+                self.view.set_viewport_position((0, viewport_y))
 
     def click(self, link):
         path = gitPath(self.view.window())
@@ -273,11 +286,27 @@ class GitBlame(sublime_plugin.TextCommand):
 
         with codecs.open(expanduser(tmpFile()), 'r', encoding='utf-8') as f:
             lines = f.readlines()
-            for line in lines:
+            stdout = ''.join(lines)
+
+            window = self.view.window()
+            results_view = window.new_file()
+            results_view.set_scratch(True)
+            results_view.set_syntax_file('Packages/Diff/Diff.tmLanguage')
+
+            results_view.set_name('GitBlame')
+
+            # deps: this is from utilities.py
+            results_view.run_command('replace_content', {"new_content": stdout})
+            results_view.sel().clear()
+            results_view.sel().add(sublime.Region(0, 0))
+
+            window.focus_view(results_view)
+
+            """for line in lines:
                 matches = re.search(r'Differential Revision: (http.*/D[0-9]+)', line)
                 if matches is not None:
                     actual_link = matches.group(1)
-                    webbrowser.open_new(actual_link)
+                    webbrowser.open_new(actual_link)"""
 
 class GitBlameRemove(sublime_plugin.TextCommand):
     def run(self, edit):
