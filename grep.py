@@ -35,8 +35,10 @@ def tmpFile():
     return grepSettings().get('tmp_file')
 
 class GrepCommand(sublime_plugin.WindowCommand):
-    def run(self, ask, show_in_view):
+    def run(self, ask, show_in_view, grep_command = None):
         self.show_in_view = show_in_view
+        self.grep_command = grep_command
+
         view = self.window.active_view()
         selection = view.sel()
         if selection:
@@ -59,7 +61,9 @@ class GrepCommand(sublime_plugin.WindowCommand):
             self.search(grep_str)
 
     def search(self, query):
-        if self.show_in_view:
+        if self.grep_command is not None:
+            command = self.grep_command.format(pipes.quote(query))
+        elif self.show_in_view:
             command = grepFormatStr().format(
                 grepPath(self.window),
                 pipes.quote(query)
@@ -153,7 +157,11 @@ class OpenCommand(sublime_plugin.WindowCommand):
 
 def open_result(result, window):
     if result.isValid():
-        view = window.open_file(prefixPath(window) + result.path)
+        if result.path.startswith("/"):
+            path = result.path
+        else:
+            path = prefixPath(window) + result.path
+        view = window.open_file(path)
 
         def handle_view():
             if result.row is not None:
