@@ -5,4 +5,7 @@
     // {0} will be replaced by git_path, {1} will be replaced by the actual search term
     "grep_format_str": "cd '{0}'; git grep -n {1}",
     "quick_grep_format_str": "cd '{0}'; git grep -n -E '(class|protocol|func|var|let|enum|struct)\\s+{1}\\b'",
+    // Alternatively, you can hardcode your grep command in sublime-keymap file. In that case, we only replace {0} with actual search term
+    // and you have to include search path in the command by yourself. It's useful to have multiple key shortcuts searching in different folders.
+    // Something like: { "keys": ["super+shift+y"], "command": "grep", "args": {"ask": true, "show_in_view": true, "grep_command": "cd /path/to/folder/;grep -rn {0} ."} }
 }
