@@ -43,14 +43,10 @@ def git_path_for_window(window):
         return folder
     return "/"
 
-def run_bash_for_output(command, tmpFile):
+def run_bash_for_output(command):
     p = Popen(command, shell=True, close_fds=True,
                   stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
-    p.wait()
+    output, err = p.communicate()
 
-    with codecs.open(expanduser(tmpFile), 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-        stdout = ''.join(lines)
-        return stdout
-    return None
+    return (codecs.decode(output, 'utf-8'), codecs.decode(err, 'utf-8'))

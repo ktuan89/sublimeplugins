@@ -1,7 +1,6 @@
 {
     "git_path": "<interpolate_from_open_folder>",
     "prefix_path": "<same_as_path>",
-    "tmp_file": "~/._tmp_grep.txt",
     // {0} will be replaced by git_path, {1} will be replaced by the actual search term
     "grep_format_str": "cd '{0}'; git grep -n {1}",
     "quick_grep_format_str": "cd '{0}'; git grep -n -E '(class|protocol|func|var|let|enum|struct)\\s+{1}\\b'",

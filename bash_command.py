@@ -31,8 +31,8 @@ class RunBash(sublime_plugin.WindowCommand):
             command = command[1:]
             path = git_path_for_window(self.window)
 
-        final_command = "cd '{0}'; {1} >~/._output_bash".format(path, command)
-        output = run_bash_for_output(final_command, "~/._output_bash")
+        final_command = "cd '{0}'; {1}".format(path, command)
+        output, _ = run_bash_for_output(final_command)
         print(final_command, " ", output)
 
         results_view = self.window.new_file()

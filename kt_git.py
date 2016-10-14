@@ -8,6 +8,7 @@ import webbrowser
 
 from .common.utils import wait_for_view_to_be_loaded_then_do
 from .common.utils import git_path_for_window
+from .common.utils import run_bash_for_output
 
 def gitSettings():
     return sublime.load_settings('Git.sublime-settings')
@@ -22,9 +23,6 @@ def gitPath(window):
 def gitWebBlameUrl():
     return gitSettings().get('web_blame_url')
 
-def tmpFile():
-    return gitSettings().get('tmp_file')
-
 class GitBase(sublime_plugin.WindowCommand):
     def gitCommand(self):
         return ""
@@ -33,44 +31,36 @@ class GitBase(sublime_plugin.WindowCommand):
         return ""
 
     def run(self):
-        p = Popen(self.gitCommand(), shell=True, close_fds=True,
-                  stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        stdout, _ = run_bash_for_output(self.gitCommand())
 
-        p.wait()
+        results_view = self.window.new_file()
+        results_view.set_scratch(True)
+        results_view.set_syntax_file('Packages/Diff/Diff.tmLanguage')
 
-        with codecs.open(expanduser(tmpFile()), 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            stdout = ''.join(lines)
+        results_view.set_name(self.gitName())
 
-            results_view = self.window.new_file()
-            results_view.set_scratch(True)
-            results_view.set_syntax_file('Packages/Diff/Diff.tmLanguage')
+        # deps: this is from utilities.py
+        results_view.run_command('replace_content', {"new_content": stdout})
+        results_view.sel().clear()
+        results_view.sel().add(sublime.Region(0, 0))
 
-            results_view.set_name(self.gitName())
-
-            # deps: this is from utilities.py
-            results_view.run_command('replace_content', {"new_content": stdout})
-            results_view.sel().clear()
-            results_view.sel().add(sublime.Region(0, 0))
-
-            self.window.focus_view(results_view)
-        pass
+        self.window.focus_view(results_view)
 
 class GitShow(GitBase):
     def gitCommand(self):
-        return "cd '{0}';git show >{1}".format(gitPath(self.window), tmpFile())
+        return "cd '{0}';git show".format(gitPath(self.window))
     def gitName(self):
         return "GitShow"
 
 class GitStatus(GitBase):
     def gitCommand(self):
-        return "cd '{0}';git status >{1}".format(gitPath(self.window), tmpFile())
+        return "cd '{0}';git status".format(gitPath(self.window))
     def gitName(self):
         return "GitStatus"
 
 class GitDiff(GitBase):
     def gitCommand(self):
-        return "cd '{0}';git diff >{1}".format(gitPath(self.window), tmpFile())
+        return "cd '{0}';git diff".format(gitPath(self.window))
     def gitName(self):
         return "GitDiff"
 
@@ -227,86 +217,76 @@ class GitBlame(sublime_plugin.TextCommand):
         current_path = self.view.file_name()
         if current_path is not None and current_path.startswith(path):
             remaining_path = current_path[len(path):]
-            command = ("cd '{0}';git blame --show-email '{1}' >{2}").format(path, remaining_path, tmpFile())
-            print(command)
-            p = Popen(command, shell=True, close_fds=True,
-                  stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            command = ("cd '{0}';git blame --show-email '{1}'").format(path, remaining_path)
 
-            p.wait()
+            output, _ = run_bash_for_output(command)
+            lines = output.split('\n')
 
-            with codecs.open(expanduser(tmpFile()), 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-                line_count = 0
+            line_count = 0
 
-                regions = self.view.lines(sublime.Region(0, self.view.size()))
-                phantoms = []
+            regions = self.view.lines(sublime.Region(0, self.view.size()))
+            phantoms = []
 
-                last_hash = None
+            last_hash = None
 
-                for line in lines:
-                    matches = re.search(r'^([0-9a-z]+).*?\(<(.*?)>', line)
-                    # print(line, ' ', matches)
-                    if matches is not None and line_count < len(regions):
-                        hash = matches.group(1)
-                        email = matches.group(2)
-                        at_position = email.find("@")
-                        if at_position != -1:
-                            email = email[:at_position]
-                        if len(email) > 10:
-                            email = email[:10]
-                        email = "{:*>10}".format(email)
+            for line in lines:
+                matches = re.search(r'^([0-9a-z]+).*?\(<(.*?)>', line)
+                # print(line, ' ', matches)
+                if matches is not None and line_count < len(regions):
+                    hash = matches.group(1)
+                    email = matches.group(2)
+                    at_position = email.find("@")
+                    if at_position != -1:
+                        email = email[:at_position]
+                    if len(email) > 10:
+                        email = email[:10]
+                    email = "{:*>10}".format(email)
 
-                        if hash == last_hash:
-                            email = "." * 10
-                            html = "<b>{0}</b>".format(email)
-                        else:
-                            html = "<a href='{0}'>{1}</a>".format(hash, email)
+                    if hash == last_hash:
+                        email = "." * 10
+                        html = "<b>{0}</b>".format(email)
+                    else:
+                        html = "<a href='{0}'>{1}</a>".format(hash, email)
 
-                        last_hash = hash
+                    last_hash = hash
 
-                        r = regions[line_count]
-                        phantom = Phantom(sublime.Region(r.begin(), r.begin()), html, sublime.LAYOUT_INLINE, lambda link: self.click(link) )
-                        phantoms.append(phantom)
+                    r = regions[line_count]
+                    phantom = Phantom(sublime.Region(r.begin(), r.begin()), html, sublime.LAYOUT_INLINE, lambda link: self.click(link) )
+                    phantoms.append(phantom)
 
-                    line_count = line_count + 1
-                global phantomSet
-                phantomSet = PhantomSet(self.view, 'git_blame')
-                phantomSet.update(phantoms)
-                global viewIdToPhantomSet
-                viewIdToPhantomSet[self.view.id()] = phantomSet
-                self.view.set_viewport_position((0, viewport_y))
+                line_count = line_count + 1
+            global phantomSet
+            phantomSet = PhantomSet(self.view, 'git_blame')
+            phantomSet.update(phantoms)
+            global viewIdToPhantomSet
+            viewIdToPhantomSet[self.view.id()] = phantomSet
+            self.view.set_viewport_position((0, viewport_y))
 
     def click(self, link):
         path = gitPath(self.view.window())
-        command = ("cd '{0}';git show {1} >{2}").format(path, link, tmpFile())
-        p = Popen(command, shell=True, close_fds=True,
-              stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        command = ("cd '{0}';git show {1}").format(path, link)
 
-        p.wait()
+        stdout, _ = run_bash_for_output(command)
 
-        with codecs.open(expanduser(tmpFile()), 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            stdout = ''.join(lines)
+        window = self.view.window()
+        results_view = window.new_file()
+        results_view.set_scratch(True)
+        results_view.set_syntax_file('Packages/Diff/Diff.tmLanguage')
 
-            window = self.view.window()
-            results_view = window.new_file()
-            results_view.set_scratch(True)
-            results_view.set_syntax_file('Packages/Diff/Diff.tmLanguage')
+        results_view.set_name('GitBlame')
 
-            results_view.set_name('GitBlame')
+        # deps: this is from utilities.py
+        results_view.run_command('replace_content', {"new_content": stdout})
+        results_view.sel().clear()
+        results_view.sel().add(sublime.Region(0, 0))
 
-            # deps: this is from utilities.py
-            results_view.run_command('replace_content', {"new_content": stdout})
-            results_view.sel().clear()
-            results_view.sel().add(sublime.Region(0, 0))
+        window.focus_view(results_view)
 
-            window.focus_view(results_view)
-
-            """for line in lines:
-                matches = re.search(r'Differential Revision: (http.*/D[0-9]+)', line)
-                if matches is not None:
-                    actual_link = matches.group(1)
-                    webbrowser.open_new(actual_link)"""
+        """for line in lines:
+            matches = re.search(r'Differential Revision: (http.*/D[0-9]+)', line)
+            if matches is not None:
+                actual_link = matches.group(1)
+                webbrowser.open_new(actual_link)"""
 
 class GitBlameRemove(sublime_plugin.TextCommand):
     def run(self, edit):

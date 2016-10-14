@@ -1,6 +1,5 @@
 {
     "path": "<interpolate_from_open_folder>",
-    "tmp_file": "~/.tmp_git.txt",
     // Format of the link to blame file, used in git_blame_in_browser command. This is an example for sublimeplugins repo.
     // Press `Command + Shift + b` on Sublime will open the blame page on web browser.
     "web_blame_url": "https://github.com/ktuan89/sublimeplugins/blame/master/{0}",

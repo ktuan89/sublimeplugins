@@ -7,6 +7,7 @@ from os.path import expanduser
 
 from .common.utils import wait_for_view_to_be_loaded_then_do
 from .common.utils import git_path_for_window
+from .common.utils import run_bash_for_output
 
 def grepSettings():
     return sublime.load_settings('Grep.sublime-settings')
@@ -30,9 +31,6 @@ def grepFormatStr():
 
 def quickGrepFormatStr():
     return grepSettings().get('quick_grep_format_str')
-
-def tmpFile():
-    return grepSettings().get('tmp_file')
 
 class GrepCommand(sublime_plugin.WindowCommand):
     def run(self, ask, show_in_view, grep_command = None):
@@ -75,21 +73,11 @@ class GrepCommand(sublime_plugin.WindowCommand):
                 pipes.quote(query)
             )
 
-        command = "{0} >{1}".format(command, tmpFile())
-
         sublime.status_message("grepping {0} ...".format(pipes.quote(query)))
 
-        p = Popen(command, shell=True, close_fds=True,
-                  stdin=PIPE, stdout=PIPE, stderr=PIPE)
-
-        p.wait()
-
-        sublime.status_message("Done grepping")
-
-        with codecs.open(expanduser(tmpFile()), 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            self.show_results(query, lines)
-        pass
+        output, _ = run_bash_for_output(command)
+        lines = output.split('\n')
+        self.show_results(query, lines)
 
     def show_results(self, query, lines):
         results = [SearchResult(line) for line in lines if line]
