@@ -32,8 +32,8 @@ class RunBash(sublime_plugin.WindowCommand):
             path = git_path_for_window(self.window)
 
         final_command = "cd '{0}'; {1}".format(path, command)
-        output, _ = run_bash_for_output(final_command)
-        print(final_command, " ", output)
+        output, err = run_bash_for_output(final_command)
+        new_content = output + '\n' + (100 * '=') + '\n' + err
 
         results_view = self.window.new_file()
         results_view.set_scratch(True)
@@ -41,7 +41,7 @@ class RunBash(sublime_plugin.WindowCommand):
         results_view.set_name("BashOutput")
 
         # deps: this is from utilities.py
-        results_view.run_command('replace_content', {"new_content": output})
+        results_view.run_command('replace_content', {"new_content": new_content})
         results_view.sel().clear()
         results_view.sel().add(sublime.Region(0, 0))
 
