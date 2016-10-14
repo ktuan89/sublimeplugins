@@ -9,6 +9,8 @@
 
     { "keys": ["ctrl+o"], "command": "open_file_in_xcode" },
 
+    { "keys": ["ctrl+b"], "command": "run_bash" },
+
     { "keys": ["ctrl+["], "command": "start_selection"},
     { "keys": ["ctrl+]"], "command": "end_selection"},
 

@@ -1,6 +1,11 @@
 import sublime
 import os
 
+from subprocess import Popen, PIPE
+import codecs
+
+from os.path import expanduser
+
 def wait_for_view_to_be_loaded_then_do(view, func):
 
     def wait_for_view_to_be_loaded_then_do_exp(view, func, timeout):
@@ -37,3 +42,15 @@ def git_path_for_window(window):
             folder = next_folder
         return folder
     return "/"
+
+def run_bash_for_output(command, tmpFile):
+    p = Popen(command, shell=True, close_fds=True,
+                  stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+    p.wait()
+
+    with codecs.open(expanduser(tmpFile), 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        stdout = ''.join(lines)
+        return stdout
+    return None
