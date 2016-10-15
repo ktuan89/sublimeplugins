@@ -8,6 +8,7 @@ from os.path import expanduser
 from .common.utils import wait_for_view_to_be_loaded_then_do
 from .common.utils import git_path_for_window
 from .common.utils import run_bash_for_output
+from .common.utils import dequeue_view
 
 def grepSettings():
     return sublime.load_settings('Grep.sublime-settings')
@@ -31,6 +32,9 @@ def grepFormatStr():
 
 def quickGrepFormatStr():
     return grepSettings().get('quick_grep_format_str')
+
+new_view_pool = []
+MAX_COUNT = 5
 
 class GrepCommand(sublime_plugin.WindowCommand):
     def run(self, ask, show_in_view, grep_command = None):
@@ -93,7 +97,8 @@ class GrepCommand(sublime_plugin.WindowCommand):
             return
 
         if self.show_in_view:
-            results_view = self.window.new_file()
+            global new_view_pool
+            results_view = dequeue_view(self.window, new_view_pool, MAX_COUNT)
             results_view.set_scratch(True)
             results_view.set_syntax_file('Packages/sublimeplugins/Grep.sublime-syntax')
             # git_diff_open will fallback when the name starts with "grep:"
@@ -106,10 +111,10 @@ class GrepCommand(sublime_plugin.WindowCommand):
 
             # deps: this is from utilities.py
             results_view.run_command('replace_content', {'new_content': result_text})
-            results_view.sel().clear()
-            results_view.sel().add(sublime.Region(0, 0))
 
             self.window.focus_view(results_view)
+            results_view.run_command('show_view_at_position', {"position": 0})
+
         else:
             self.open_files = []
             self.open_results = []

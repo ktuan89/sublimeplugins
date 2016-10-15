@@ -9,6 +9,7 @@ import webbrowser
 from .common.utils import wait_for_view_to_be_loaded_then_do
 from .common.utils import git_path_for_window
 from .common.utils import run_bash_for_output
+from .common.utils import dequeue_view
 
 def gitSettings():
     return sublime.load_settings('Git.sublime-settings')
@@ -23,6 +24,9 @@ def gitPath(window):
 def gitWebBlameUrl():
     return gitSettings().get('web_blame_url')
 
+new_view_pool = []
+MAX_COUNT = 5
+
 class GitBase(sublime_plugin.WindowCommand):
     def gitCommand(self):
         return ""
@@ -33,7 +37,8 @@ class GitBase(sublime_plugin.WindowCommand):
     def run(self):
         stdout, _ = run_bash_for_output(self.gitCommand())
 
-        results_view = self.window.new_file()
+        global new_view_pool
+        results_view = dequeue_view(self.window, new_view_pool, MAX_COUNT)
         results_view.set_scratch(True)
         results_view.set_syntax_file('Packages/Diff/Diff.tmLanguage')
 
@@ -41,10 +46,9 @@ class GitBase(sublime_plugin.WindowCommand):
 
         # deps: this is from utilities.py
         results_view.run_command('replace_content', {"new_content": stdout})
-        results_view.sel().clear()
-        results_view.sel().add(sublime.Region(0, 0))
 
         self.window.focus_view(results_view)
+        results_view.run_command('show_view_at_position', {"position": 0})
 
 class GitShow(GitBase):
     def gitCommand(self):

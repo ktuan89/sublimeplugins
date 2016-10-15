@@ -43,6 +43,20 @@ def git_path_for_window(window):
         return folder
     return "/"
 
+def dequeue_view(window, pool, count):
+    d = {}
+    for view in window.views():
+        d[view.id()] = view
+    while len(pool) >= count:
+        vid = pool.pop()
+        if vid in d:
+            pool.insert(0, vid)
+            return d[vid]
+
+    view = window.new_file()
+    pool.insert(0, view.id())
+    return view
+
 def run_bash_for_output(command):
     p = Popen(command, shell=True, close_fds=True,
                   stdin=PIPE, stdout=PIPE, stderr=PIPE)
