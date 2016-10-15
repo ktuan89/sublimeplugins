@@ -101,7 +101,7 @@ class GrepCommand(sublime_plugin.WindowCommand):
 
             result_text = 'Query: {0}\n\n{1}\n'.format(
                 query,
-                ''.join(lines)
+                '\n'.join(lines)
             )
 
             # deps: this is from utilities.py

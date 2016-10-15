@@ -70,19 +70,23 @@ class GitDiffOpen(sublime_plugin.WindowCommand):
             if region.empty():
                 return region.begin()
         return -1
+
+    def is_binary_line(self, str):
+        return str.startswith("diff --git")
+
     def run(self):
         view = self.window.active_view()
         if view.name().startswith("Git") or (view.file_name() is not None and view.file_name().endswith("diff")):
-            print("ere")
+
             pos = self.positionFromView(view)
             line = view.line(pos)
 
             current_line = view.substr(line)
 
-
             line_offset = pos - line.begin()
             position_str = ""
             file_str = ""
+            binary_file_str = current_line if self.is_binary_line(current_line) else ""
             line_count = 0
             while True:
                 if line.begin() <= 0:
@@ -99,8 +103,18 @@ class GitDiffOpen(sublime_plugin.WindowCommand):
                 if file_str=="" and str.startswith("+++"):
                     file_str = str
 
+                if binary_file_str=="" and self.is_binary_line(str):
+                    binary_file_str = str
+
                 if file_str != "" and position_str != "":
                     break
+
+            # binary case
+            if binary_file_str != "":
+                matches = re.search(r'a\/([^\s]+)', binary_file_str[len("diff --git"):])
+                file_name = matches.group(1)
+                self.window.open_file(gitPath(self.window) + file_name.strip())
+                return
 
             if file_str == "" or position_str == "":
                 return
