@@ -3,6 +3,7 @@ import re
 import pipes
 from subprocess import Popen, PIPE
 import codecs
+import os.path
 from os.path import expanduser
 
 from .common.utils import wait_for_view_to_be_loaded_then_do
@@ -165,7 +166,6 @@ def open_result(result, window):
 
         wait_for_view_to_be_loaded_then_do(view, handle_view)
 
-
 class SearchResult():
     def __init__(self, line):
         self.search_result = re.search('([^:]+):(\d+):(.*)', line)
@@ -177,3 +177,33 @@ class SearchResult():
 
     def isValid(self):
         return self.search_result is not None and self.path is not None
+
+class GrepReplaceSaveCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        str = self.view.substr(sublime.Region(0, self.view.size()))
+        lines = str.split('\n')
+        for line in lines:
+            result = SearchResult(line)
+            if result.isValid() and result.row is not None and result.content is not None:
+                if result.path.startswith("/"):
+                    path = result.path
+                else:
+                    path = prefixPath(self.view.window()) + result.path
+                if os.path.isfile(path):
+                    with codecs.open(path, 'r', encoding='utf-8') as f:
+                        file_lines = f.readlines()
+                        f.close()
+
+                        if len(file_lines) >= result.row and result.row > 0:
+                            file_line = file_lines[result.row - 1]
+                            if file_line.endswith('\n'):
+                                file_line = file_line[:-1]
+                            if file_line != result.content:
+                                file_lines[result.row - 1] = result.content + "\n"
+
+                                with codecs.open(path, 'w', encoding='utf-8') as fout:
+                                    fout.write(''.join(file_lines))
+                                    fout.close()
+
+                                print("Should replace\n", "'"+file_line+"'", "\n", "'"+result.content+"'\n", path)
+        pass
