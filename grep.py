@@ -38,7 +38,7 @@ new_view_pool = []
 MAX_COUNT = 5
 
 class GrepCommand(sublime_plugin.WindowCommand):
-    def run(self, ask, show_in_view, grep_command = None):
+    def run(self, ask, show_in_view, grep_command = None, ask_title = None):
         self.show_in_view = show_in_view
         self.grep_command = grep_command
 
@@ -53,7 +53,7 @@ class GrepCommand(sublime_plugin.WindowCommand):
 
         if ask or len(grep_str) <= 4:
             input_panel = self.window.show_input_panel(
-                'Grep for: ',
+                '{0}'.format('Grep for: ' if ask_title is None else ask_title),
                 grep_str,
                 lambda query: self.search(query),
                 None,
