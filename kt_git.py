@@ -139,6 +139,9 @@ class GitDiffOpen(sublime_plugin.WindowCommand):
             # deps: going to add this fallback soon
             self.window.run_command('open')
             pass
+        else:
+            self.window.run_command('generic_open')
+            pass
         pass
 
 class GitListModifiedFiles(sublime_plugin.WindowCommand):

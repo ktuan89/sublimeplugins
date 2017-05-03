@@ -1,0 +1,8 @@
+{
+    // When your current cursor is under a partial path (such as tmp/my_file.txt), it will try to concat the following list of folders
+    // to the partial path, check if the file exists and open it. In this case, it will check /Users/anhk/tmp/my_file.txt and /Users/anhk/sources/tmp/my_file.txt
+    "path_list": [
+        "/Users/anhk/",
+        "/Users/anhk/sources/",
+    ]
+}
