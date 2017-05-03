@@ -13,23 +13,26 @@ class RunBash(sublime_plugin.WindowCommand):
         view = window.active_view()
         if view.file_name() is not None:
             path = os.path.join(os.path.dirname(view.file_name()), '')
+            file_name = os.path.basename(view.file_name())
             window.show_input_panel(
                 'Bash:',
                 last_command,
                 lambda command: (
-                    self.run_bash(path, command)
+                    self.run_bash(path, file_name, command)
                 ),
                 None,
                 None
             )
 
-    def run_bash(self, path, command):
+    def run_bash(self, path, file_name, command):
         global last_command
         last_command = command
 
         if command.startswith('$'):
             command = command[1:]
             path = git_path_for_window(self.window)
+
+        command = command.replace("@", file_name)
 
         final_command = "cd '{0}'; {1}".format(path, command)
         output, err = run_bash_for_output(final_command)
