@@ -1,6 +1,8 @@
 import sublime, sublime_plugin
 import re
 
+from .common.utils import wait_for_view_to_be_loaded_then_do
+
 kt_last_same_word = ""
 
 class GoToSameWord(sublime_plugin.TextCommand):
@@ -175,3 +177,107 @@ class JumpToAppearances(sublime_plugin.WindowCommand):
             the_view.run_command('show_view_at_position', {"position": the_position})
 
         return selected
+
+class QuickFind(sublime_plugin.WindowCommand):
+
+    all_views = []
+    last_string_to_find = ""
+    last_line = -1
+    current_file_index = 0
+
+    def run(self):
+        global kt_active_view_list
+        current_view = self.window.active_view()
+
+        other_views = [v for v in self.window.views() if v.id() != current_view.id()]
+        other_views_in_order = []
+        added_view_ids = set()
+        # TODO: optimize it
+        for ordered_index in kt_active_view_list:
+            for cur_view in other_views:
+                if cur_view.id() == ordered_index and cur_view.id() not in added_view_ids:
+                    other_views_in_order.append(cur_view)
+                    added_view_ids.add(cur_view.id())
+        for cur_view in other_views:
+            if cur_view.id() not in added_view_ids:
+                other_views_in_order.append(cur_view)
+                added_view_ids.add(cur_view.id())
+
+        views = other_views_in_order
+        self.all_views = views[0:MAX_VIEWS]
+
+        current_view = self.window.active_view()
+        text = ""
+        for region in current_view.sel():
+            if region.empty():
+                text = current_view.substr(current_view.word(region.begin()))
+
+        input_panel = None
+        input_panel = self.window.show_input_panel(
+            'Quick search: ',
+            text,
+            lambda query: self.search(query),
+            lambda query: self.on_change(input_panel),
+            None)
+        input_panel.settings().set("tab_completion", False)
+        input_panel.sel().add(sublime.Region(input_panel.size(), input_panel.size()))
+        input_panel.show(input_panel.size())
+        sublime.set_timeout(lambda: input_panel.show(0), 100)
+
+    def find_str(self, stringToFind):
+        if len(stringToFind) < 2 or len(self.all_views) == 0:
+            return
+
+        original_file_index = self.current_file_index
+        for tt in range(len(self.all_views)):
+            view_to_consider = self.all_views[self.current_file_index]
+            result = self.find_text(view_to_consider, self.last_line, stringToFind)
+            if result is not None:
+                (found_line, found_pos) = result
+                self.last_line = found_line
+                self.window.focus_view(view_to_consider)
+                the_position = view_to_consider.text_point(found_line, found_pos)
+                def focus():
+                    view_to_consider.run_command('show_view_at_position', {"position": the_position, "length": len(stringToFind)})
+                wait_for_view_to_be_loaded_then_do(view_to_consider, focus)
+                break
+            else:
+                self.current_file_index = (self.current_file_index + 1) % len(self.all_views)
+                self.last_line = -1
+                if self.current_file_index == original_file_index:
+                    break
+
+    def find_text(self, view, last_line, text):
+        regions = view.split_by_newlines(sublime.Region(0, view.size()))
+        for i in range(0, len(regions)):
+            if i > last_line:
+                line = view.substr(regions[i])
+                pos = line.find(text)
+                if pos >= 0:
+                    return (i, pos)
+        return None
+
+    def on_change(self, view):
+        if not view:
+            return
+        selection = view.sel()
+        if len(selection) != 1:
+            return
+        region = selection[0]
+        if not region.empty():
+            return
+        pos = region.begin()
+        print("\"" + view.substr(sublime.Region(0, view.size())) + "\"")
+        if view.substr(pos - 1) == '\t':
+            stringToFind = view.substr(sublime.Region(0, pos - 1))
+            view.run_command('remove_last_tab')
+            self.find_str(stringToFind)
+        else:
+            current_file_index = 0
+            last_line = -1
+
+class RemoveLastTab(sublime_plugin.TextCommand):
+    def run(self, edit):
+        length = self.view.size()
+        self.view.erase(edit, sublime.Region(length - 1, length))
+

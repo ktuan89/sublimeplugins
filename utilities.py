@@ -91,7 +91,11 @@ class CopyCurrentWord(sublime_plugin.TextCommand):
 
 # We need to run a text command in order to force the view to update it cursor rendering
 class ShowViewAtPosition(sublime_plugin.TextCommand):
-    def run(self, edit, position):
+    def run(self, edit, position, length = 0):
         self.view.show_at_center(position)
         self.view.sel().clear()
-        self.view.sel().add(sublime.Region(position, position))
+        end_position = position
+        if length > 0:
+            print("=== end_position = ", end_position)
+            end_position = position + length
+        self.view.sel().add(sublime.Region(position, end_position))
