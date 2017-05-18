@@ -14,9 +14,9 @@ contexts:
 
     - match: \b(if|else|for|while|in|case|switch|return)\b
       scope: keyword.control.grep
-    - match: \b(class|struct|enum|protocol|func)\b
+    - match: \b(class|struct|enum|protocol|func|init)\b
       scope: storage.type.function.grep
-    - match: \b(private|public|internal|override)\b
+    - match: \b(private|public|internal|override|var|let)\b
       scope: keyword.control.grep
 
     - match: '//'
@@ -30,6 +30,9 @@ contexts:
 
     - match: '"'
       push: string_double_quote
+
+    - match: \b([A-Z])\w*
+      scope: support.class
 
   string_double_quote:
     - meta_scope: string.grep
