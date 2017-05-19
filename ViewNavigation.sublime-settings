@@ -1,4 +1,8 @@
 {
     "xcodepath": "/Applications/Xcode.app",
-    "terminalpath": "/Applications/Utilities/Terminal.app"
+    "terminalpath": "/Applications/Utilities/Terminal.app",
+    "bookmark_paths": {
+        // some bookmarked paths for in-folder switcher, for example:
+        // "anhk": "/Users/anhk/",
+    }
 }

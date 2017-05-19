@@ -1,7 +1,7 @@
 import sublime, sublime_plugin
 import os
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, isdir
 
 def settings():
     return sublime.load_settings('ViewNavigation.sublime-settings')
@@ -11,6 +11,9 @@ def xcodePath():
 
 def terminalPath():
     return settings().get('terminalpath')
+
+def bookmarkPaths():
+    return settings().get('bookmark_paths')
 
 # this class is not my code, copied from internet
 class ExtendedSwitcherHaha(sublime_plugin.WindowCommand):
@@ -94,6 +97,7 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
 
     files = []
     is_file = []
+    actual_path = []
 
     mypath = ""
 
@@ -109,25 +113,50 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
     def open_for_current_path(self):
         self.files = []
         self.is_file = []
+        self.is_bookmarked = []
         for f in listdir(self.mypath):
             self.files.append(f)
             self.is_file.append(isfile(join(self.mypath, f)))
+            self.actual_path.append(None)
 
         if self.mypath != "/":
             self.files.append("`")
             self.is_file.append(False)
+            self.actual_path.append(None)
+
+        bookmarks = bookmarkPaths()
+        for name in bookmarks:
+            path = bookmarks[name]
+            if isfile(path):
+                self.files.append(name)
+                self.is_file.append(True)
+                self.actual_path.append(path)
+            elif isdir(path):
+                self.files.append(name)
+                self.is_file.append(False)
+                self.actual_path.append(path)
 
         self.window.show_quick_panel(self.files, self.tab_selected)
 
     def tab_selected(self, selected):
         if selected > -1:
             if self.is_file[selected]:
-                self.window.open_file(os.path.join(self.mypath,self.files[selected]))
+                path_to_open = None
+                if self.actual_path[selected]:
+                    path_to_open = self.actual_path[selected]
+                else:
+                    path_to_open = os.path.join(self.mypath,self.files[selected])
+                self.window.open_file(path_to_open)
             else:
-                folder = self.files[selected]
-                if folder == "`":
-                    folder = ".."
-                self.mypath = os.path.join(self.mypath, folder)
+                path_to_open = None
+                if self.actual_path[selected]:
+                    path_to_open = self.actual_path[selected]
+                else:
+                    folder = self.files[selected]
+                    if folder == "`":
+                        folder = ".."
+                    path_to_open = os.path.join(self.mypath, folder)
+                self.mypath = path_to_open
                 sublime.set_timeout_async(self.open_for_current_path, 50)
 
         return selected
