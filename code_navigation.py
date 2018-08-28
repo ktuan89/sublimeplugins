@@ -152,7 +152,7 @@ class JumpToAppearances(sublime_plugin.WindowCommand):
                 l_file_name = "Untitled"
                 continue
             s = self.find_text(v, text)
-            print(s)
+            # print("find_text ", s)
             if s is not None:
                 self.open_files.append([l_file_name, s[0]])
                 self.open_views.append(v)
@@ -267,7 +267,7 @@ class QuickFind(sublime_plugin.WindowCommand):
         if not region.empty():
             return
         pos = region.begin()
-        print("\"" + view.substr(sublime.Region(0, view.size())) + "\"")
+        # print("\"" + view.substr(sublime.Region(0, view.size())) + "\"")
         if view.substr(pos - 1) == '\t':
             stringToFind = view.substr(sublime.Region(0, pos - 1))
             view.run_command('remove_last_tab')
@@ -275,6 +275,21 @@ class QuickFind(sublime_plugin.WindowCommand):
         else:
             current_file_index = 0
             last_line = -1
+
+    def search(self, stringToFind):
+        self.find_str(stringToFind)
+
+        input_panel = None
+        input_panel = self.window.show_input_panel(
+            'Quick search: ',
+            stringToFind,
+            lambda query: self.search(query),
+            lambda query: self.on_change(input_panel),
+            None)
+        input_panel.settings().set("tab_completion", False)
+        input_panel.sel().add(sublime.Region(input_panel.size(), input_panel.size()))
+        input_panel.show(input_panel.size())
+        sublime.set_timeout(lambda: input_panel.show(0), 100)
 
 class RemoveLastTab(sublime_plugin.TextCommand):
     def run(self, edit):

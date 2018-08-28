@@ -113,7 +113,7 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
     def open_for_current_path(self):
         self.files = []
         self.is_file = []
-        self.is_bookmarked = []
+        self.actual_path = []
         for f in listdir(self.mypath):
             self.files.append(f)
             self.is_file.append(isfile(join(self.mypath, f)))

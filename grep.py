@@ -38,9 +38,10 @@ new_view_pool = []
 MAX_COUNT = 5
 
 class GrepCommand(sublime_plugin.WindowCommand):
-    def run(self, ask, show_in_view, grep_command = None, ask_title = None):
+    def run(self, ask, show_in_view, grep_command = None, ask_title = None, duplicate_results=False):
         self.show_in_view = show_in_view
         self.grep_command = grep_command
+        self.duplicate_results = duplicate_results
 
         view = self.window.active_view()
         selection = view.sel()
@@ -121,11 +122,19 @@ class GrepCommand(sublime_plugin.WindowCommand):
             self.open_results = []
 
             for result in results:
-                self.open_results.append(result)
-                if result.content:
-                    self.open_files.append([result.path, result.content])
-                else:
-                    self.open_files.append(result.path)
+                if hasattr(result, 'path'):
+                    self.open_results.append(result)
+                    if hasattr(result, 'content'):
+                        self.open_files.append([result.path, result.content])
+                    else:
+                        self.open_files.append(result.path)
+
+            if self.duplicate_results:
+                for result in results:
+                    if hasattr(result, 'path'):
+                        if hasattr(result, 'content'):
+                            self.open_results.append(result)
+                            self.open_files.append([result.content, result.path])
 
             self.window.show_quick_panel(self.open_files, self.tab_selected) # show the file list
 
