@@ -1,6 +1,12 @@
 [
     { "keys": ["super+shift+t"], "command": "grep", "args": {"ask": true,  "show_in_view": true} },
     { "keys": ["ctrl+enter"],    "command": "grep", "args": {"ask": false, "show_in_view": false} },
+    { "keys": ["super+ctrl+\\"], "command": "grep", "args": {
+        "ask": false,
+        "show_in_view": false,
+        "duplicate_results": true,
+        "grep_command": "cd {0};git grep -n {1} ."
+    } },
 
     { "keys": ["super+shift+j"], "command": "reveal_in_side_bar" },
     { "keys": ["ctrl+f"], "command": "filter_text"},

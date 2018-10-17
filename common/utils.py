@@ -41,7 +41,13 @@ def git_path_for_window(window):
                 break
             folder = next_folder
         return folder
-    return "/"
+    file_name = window.active_view().file_name()
+    if file_name:
+        path = os.path.join(os.path.dirname(file_name), '')
+        return path
+    # intentionally keep random result to avoid harming the file system although
+    # we are running a `git grep` command in here and the command is read-only
+    return "/R_A__N_D___O_M_F_I___L__E/"
 
 def dequeue_view(window, pool, count):
     d = {}

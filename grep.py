@@ -66,7 +66,7 @@ class GrepCommand(sublime_plugin.WindowCommand):
 
     def search(self, query):
         if self.grep_command is not None:
-            command = self.grep_command.format(pipes.quote(query))
+            command = self.grep_command.format(grepPath(self.window), pipes.quote(query))
         elif self.show_in_view:
             command = grepFormatStr().format(
                 grepPath(self.window),
