@@ -1,6 +1,7 @@
 import sublime, sublime_plugin
 from sublime import Phantom, PhantomSet
 import re
+import os
 from subprocess import Popen, PIPE
 import codecs
 from os.path import expanduser
@@ -28,14 +29,14 @@ new_view_pool = []
 MAX_COUNT = 5
 
 class KtGitBase(sublime_plugin.WindowCommand):
-    def gitCommand(self):
+    def gitCommand(self, param=None):
         return ""
 
     def gitName(self):
         return ""
 
-    def run(self):
-        stdout, _ = run_bash_for_output(self.gitCommand())
+    def run(self, param=None):
+        stdout, _ = run_bash_for_output(self.gitCommand(param))
 
         global new_view_pool
         results_view = dequeue_view(self.window, new_view_pool, MAX_COUNT)
@@ -51,19 +52,22 @@ class KtGitBase(sublime_plugin.WindowCommand):
         results_view.run_command('show_view_at_position', {"position": 0})
 
 class KtGitShow(KtGitBase):
-    def gitCommand(self):
-        return "cd '{0}';git show".format(gitPath(self.window))
+    def gitCommand(self, param=None):
+        if param is None:
+            return "cd '{0}';git show".format(gitPath(self.window))
+        else:
+            return "cd '{0}';git show {1}".format(gitPath(self.window), param)
     def gitName(self):
         return "GitShow"
 
 class KtGitStatus(KtGitBase):
-    def gitCommand(self):
+    def gitCommand(self, param=None):
         return "cd '{0}';git status".format(gitPath(self.window))
     def gitName(self):
         return "GitStatus"
 
 class KtGitDiff(KtGitBase):
-    def gitCommand(self):
+    def gitCommand(self, param=None):
         return "cd '{0}';git diff".format(gitPath(self.window))
     def gitName(self):
         return "GitDiff"
@@ -228,6 +232,74 @@ class KtGitListBranches(sublime_plugin.WindowCommand):
             p.wait()
             sublime.status_message("git: checkout " + branch)
             pass
+
+class KtGitListRecentCommits(sublime_plugin.WindowCommand):
+
+    commits = []
+    hashes = []
+
+    def run(self):
+        command = "cd '{0}';git log --pretty=format:'%h%x09%an%x09%s' HEAD~200...HEAD".format(gitPath(self.window))
+        p = Popen(command, shell=True, close_fds=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+        p.wait()
+        commits = []
+        hashes = []
+
+        for line in p.stdout.readlines():
+            str = line.decode("utf-8")
+            commits.append(str)
+            hashes.append(str[0:7])
+
+        self.commits = commits
+        self.hashes = hashes
+        self.window.show_quick_panel(commits, self.tab_selected)
+
+    def tab_selected(self, selected):
+        if selected > -1:
+            self.window.run_command('kt_git_show', {"param": self.hashes[selected]})
+
+last_commit = ""
+
+class KtGitViewCurrentFileFromCommit(sublime_plugin.WindowCommand):
+    def run(self):
+        global last_commit
+        input_panel = self.window.show_input_panel(
+            'Show the current file from commit:',
+            last_commit,
+            lambda commit: (
+                self.show_commit(commit)
+            ),
+            None,
+            None
+        )
+        input_panel.sel().add(sublime.Region(0, input_panel.size()))
+
+    def show_commit(self, commit):
+        global last_commit
+        last_commit = commit
+        git_path = gitPath(self.window)
+        file_name = self.window.active_view().file_name()
+        view = self.window.active_view()
+        syntax = view.settings().get('syntax')
+        if not file_name.startswith(git_path):
+            return
+        base_name = os.path.basename(file_name)
+        file_name = file_name[len(git_path):]
+        command = "cd '{0}';git show {1}:{2}".format(git_path, commit, file_name)
+        output, err = run_bash_for_output(command)
+
+        results_view = self.window.new_file()
+        results_view.set_scratch(True)
+        results_view.set_syntax_file(syntax)
+        results_view.set_name(base_name + " from " + commit)
+
+        # deps: this is from utilities.py
+        results_view.run_command('replace_content', {"new_content": output})
+        results_view.sel().clear()
+        results_view.sel().add(sublime.Region(0, 0))
+
+        self.window.focus_view(results_view)
 
 viewIdToPhantomSet = {}
 

@@ -5,7 +5,7 @@
         "ask": false,
         "show_in_view": false,
         "duplicate_results": true,
-        "grep_command": "cd {0};git grep -n {1} ."
+        "grep_command": "cd '{0}';git grep -n {1} ."
     } },
 
     { "keys": ["super+shift+j"], "command": "reveal_in_side_bar" },
@@ -36,6 +36,8 @@
     { "keys": ["ctrl+g", "a"], "command": "kt_git_add"},
     { "keys": ["ctrl+g", "b"], "command": "kt_git_blame"},
     { "keys": ["ctrl+g", "r"], "command": "kt_git_blame_remove"},
+    { "keys": ["ctrl+g", "c"], "command": "kt_git_list_recent_commits"},
+    { "keys": ["ctrl+g", "f"], "command": "kt_git_view_current_file_from_commit"},
     { "keys": ["super+shift+b"], "command": "kt_git_blame_in_browser" },
     { "keys": ["super+shift+\\"], "command": "kt_git_diff_open" },
 
