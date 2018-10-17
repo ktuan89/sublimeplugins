@@ -27,7 +27,7 @@ def gitWebBlameUrl():
 new_view_pool = []
 MAX_COUNT = 5
 
-class GitBase(sublime_plugin.WindowCommand):
+class KtGitBase(sublime_plugin.WindowCommand):
     def gitCommand(self):
         return ""
 
@@ -50,25 +50,25 @@ class GitBase(sublime_plugin.WindowCommand):
         self.window.focus_view(results_view)
         results_view.run_command('show_view_at_position', {"position": 0})
 
-class GitShow(GitBase):
+class KtGitShow(KtGitBase):
     def gitCommand(self):
         return "cd '{0}';git show".format(gitPath(self.window))
     def gitName(self):
         return "GitShow"
 
-class GitStatus(GitBase):
+class KtGitStatus(KtGitBase):
     def gitCommand(self):
         return "cd '{0}';git status".format(gitPath(self.window))
     def gitName(self):
         return "GitStatus"
 
-class GitDiff(GitBase):
+class KtGitDiff(KtGitBase):
     def gitCommand(self):
         return "cd '{0}';git diff".format(gitPath(self.window))
     def gitName(self):
         return "GitDiff"
 
-class GitDiffOpen(sublime_plugin.WindowCommand):
+class KtGitDiffOpen(sublime_plugin.WindowCommand):
     def positionFromView(self, view):
         for region in view.sel():
             if region.empty():
@@ -144,7 +144,7 @@ class GitDiffOpen(sublime_plugin.WindowCommand):
             pass
         pass
 
-class GitListModifiedFiles(sublime_plugin.WindowCommand):
+class KtGitListModifiedFiles(sublime_plugin.WindowCommand):
 
     files = []
 
@@ -176,7 +176,7 @@ class GitListModifiedFiles(sublime_plugin.WindowCommand):
             self.window.open_file(gitPath(self.window) + file_name)
             pass
 
-class GitAdd(sublime_plugin.WindowCommand):
+class KtGitAdd(sublime_plugin.WindowCommand):
 
     files = []
 
@@ -194,7 +194,7 @@ class GitAdd(sublime_plugin.WindowCommand):
             print(str)
         pass
 
-class GitListBranches(sublime_plugin.WindowCommand):
+class KtGitListBranches(sublime_plugin.WindowCommand):
 
     branches = []
 
@@ -231,7 +231,7 @@ class GitListBranches(sublime_plugin.WindowCommand):
 
 viewIdToPhantomSet = {}
 
-class GitBlame(sublime_plugin.TextCommand):
+class KtGitBlame(sublime_plugin.TextCommand):
     def run(self, edit):
         (viewport_x, viewport_y) = self.view.viewport_position()
         path = gitPath(self.view.window())
@@ -309,14 +309,14 @@ class GitBlame(sublime_plugin.TextCommand):
                 actual_link = matches.group(1)
                 webbrowser.open_new(actual_link)"""
 
-class GitBlameRemove(sublime_plugin.TextCommand):
+class KtGitBlameRemove(sublime_plugin.TextCommand):
     def run(self, edit):
         global viewIdToPhantomSet
         if self.view.id() in viewIdToPhantomSet:
             viewIdToPhantomSet[self.view.id()].update([])
             viewIdToPhantomSet.pop(self.view.id(), None)
 
-class GitBlameInBrowser(sublime_plugin.TextCommand):
+class KtGitBlameInBrowser(sublime_plugin.TextCommand):
     def run(self, edit):
         path = gitPath(self.view.window())
         current_path = self.view.file_name()
