@@ -99,30 +99,30 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
     is_file = []
     actual_path = []
 
-    mypath = ""
+    mypath = None
 
     def run(self):
-
         file_name = self.window.active_view().file_name()
         if file_name is not None:
             self.mypath = os.path.join(os.path.dirname(file_name), '')
-            self.open_for_current_path()
-
-        pass
+        else:
+            self.mypath = None
+        self.open_for_current_path()
 
     def open_for_current_path(self):
         self.files = []
         self.is_file = []
         self.actual_path = []
-        for f in listdir(self.mypath):
-            self.files.append(f)
-            self.is_file.append(isfile(join(self.mypath, f)))
-            self.actual_path.append(None)
+        if self.mypath:
+            for f in listdir(self.mypath):
+                self.files.append(f)
+                self.is_file.append(isfile(join(self.mypath, f)))
+                self.actual_path.append(None)
 
-        if self.mypath != "/":
-            self.files.append("`")
-            self.is_file.append(False)
-            self.actual_path.append(None)
+            if self.mypath != "/":
+                self.files.append("`")
+                self.is_file.append(False)
+                self.actual_path.append(None)
 
         bookmarks = bookmarkPaths()
         for name in bookmarks:
@@ -136,7 +136,8 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
                 self.is_file.append(False)
                 self.actual_path.append(path)
 
-        self.window.show_quick_panel(self.files, self.tab_selected)
+        if len(self.files) > 0:
+            self.window.show_quick_panel(self.files, self.tab_selected)
 
     def tab_selected(self, selected):
         if selected > -1:
