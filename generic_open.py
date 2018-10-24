@@ -5,6 +5,7 @@ import os
 from os.path import isdir, isfile, join
 
 from .common.utils import wait_for_view_to_be_loaded_then_do
+from .common.utils import open_file_in_window
 
 def genericOpenSettings():
     return sublime.load_settings('GenericOpen.sublime-settings')
@@ -56,7 +57,7 @@ class GenericOpenCommand(sublime_plugin.WindowCommand):
         (file_path, positions) = split_positions_from_file_path(str)
         file_name = actual_file_from_partial_file_path(file_path)
         if file_name is not None:
-            view = self.window.open_file(file_name)
+            view = open_file_in_window(self.window, file_name)
             def reposition():
                 if positions is not None:
                     rowcol = row_col_from_positions(positions)

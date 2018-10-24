@@ -2,6 +2,7 @@ import sublime, sublime_plugin
 import os
 from os import listdir
 from os.path import isfile, join, isdir
+from .common.utils import open_file_in_window
 
 def settings():
     return sublime.load_settings('ViewNavigation.sublime-settings')
@@ -147,7 +148,7 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
                     path_to_open = self.actual_path[selected]
                 else:
                     path_to_open = os.path.join(self.mypath,self.files[selected])
-                self.window.open_file(path_to_open)
+                open_file_in_window(self.window, path_to_open)
             else:
                 path_to_open = None
                 if self.actual_path[selected]:

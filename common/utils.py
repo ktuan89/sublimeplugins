@@ -73,3 +73,16 @@ def run_bash_for_output(command):
     output, err = p.communicate()
 
     return (codecs.decode(output, 'utf-8'), codecs.decode(err, 'utf-8'))
+
+def open_file_in_window(window, file_name):
+    # keep old style open_file for now
+    return window.open_file(file_name)
+    # always open a file in the active group
+    view = window.find_open_file(file_name)
+    if view is None:
+        return window.open_file(file_name)
+    else:
+        (group_id, view_index) = window.get_view_index(view)
+        if group_id != window.active_group():
+            window.set_view_index(view, window.active_group(), 0)
+        return window.open_file(file_name)

@@ -10,6 +10,7 @@ from .common.utils import wait_for_view_to_be_loaded_then_do
 from .common.utils import git_path_for_window
 from .common.utils import run_bash_for_output
 from .common.utils import dequeue_view
+from .common.utils import open_file_in_window
 
 def grepSettings():
     return sublime.load_settings('Grep.sublime-settings')
@@ -164,7 +165,7 @@ def open_result(result, window):
             path = result.path
         else:
             path = prefixPath(window) + result.path
-        view = window.open_file(path)
+        view = open_file_in_window(window, path)
 
         def handle_view():
             if result.row is not None:

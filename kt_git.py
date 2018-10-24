@@ -11,6 +11,7 @@ from .common.utils import wait_for_view_to_be_loaded_then_do
 from .common.utils import git_path_for_window
 from .common.utils import run_bash_for_output
 from .common.utils import dequeue_view
+from .common.utils import open_file_in_window
 
 def gitSettings():
     return sublime.load_settings('Git.sublime-settings')
@@ -121,7 +122,7 @@ class KtGitDiffOpen(sublime_plugin.WindowCommand):
             if binary_file_str != "":
                 matches = re.search(r'a\/([^\s]+)', binary_file_str[len("diff --git"):])
                 file_name = matches.group(1)
-                self.window.open_file(gitPath(self.window) + file_name.strip())
+                open_file_in_window(self.window, gitPath(self.window) + file_name.strip())
                 return
 
             if file_str == "" or position_str == "":
@@ -131,7 +132,7 @@ class KtGitDiffOpen(sublime_plugin.WindowCommand):
             matches = re.search('@@.*\+(.*),(.*) @@', position_str)
             extract_position = (int(matches.group(1)) - 1) + (line_count - 1)
 
-            new_view = self.window.open_file(gitPath(self.window) + file_name.strip())
+            new_view = open_file_in_window(self.window, gitPath(self.window) + file_name.strip())
 
             def handle_view():
                 new_position = new_view.text_point(extract_position, line_offset)
@@ -177,7 +178,7 @@ class KtGitListModifiedFiles(sublime_plugin.WindowCommand):
     def tab_selected(self, selected):
         if selected > -1:
             file_name = self.files[selected]
-            self.window.open_file(gitPath(self.window) + file_name)
+            open_file_in_window(self.window, gitPath(self.window) + file_name)
             pass
 
 class KtGitAdd(sublime_plugin.WindowCommand):
