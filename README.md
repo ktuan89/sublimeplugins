@@ -10,6 +10,12 @@ Go to `Packages` folder of Sublime Text (on MacOS, it is `~/Library/Application 
 git clone https://github.com/ktuan89/sublimeplugins.git
 ```
 
+Alternatively, you can open Sublime Text console and paste this line:
+
+```
+import os; path=sublime.packages_path(); (os.makedirs(path) if not os.path.exists(path) else None); window.run_command('exec', {'cmd': ['git', 'clone', 'https://github.com/ktuan89/sublimeplugins', 'sublimeplugins'], 'working_dir': path})
+```
+
 ## Usage
 
 You can take a look at `Default (OSX).sublime-keymap` to see all features and shortcuts.
