@@ -53,14 +53,17 @@ def dequeue_view(window, pool, count):
     d = {}
     for view in window.views():
         d[view.id()] = view
-    while len(pool) >= count:
-        vid = pool.pop()
+    active_group = window.active_group()
+    per_group_pool = pool.get(active_group, [])
+    while len(per_group_pool) >= count:
+        vid = per_group_pool.pop()
         if vid in d:
-            pool.insert(0, vid)
+            per_group_pool.insert(0, vid)
             return d[vid]
 
     view = window.new_file()
-    pool.insert(0, view.id())
+    per_group_pool.insert(0, view.id())
+    pool[active_group] = per_group_pool
     return view
 
 def run_bash_for_output(command):

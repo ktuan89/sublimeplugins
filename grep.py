@@ -34,7 +34,7 @@ def grepFormatStr():
 def quickGrepFormatStr():
     return grepSettings().get('quick_grep_format_str')
 
-new_view_pool = []
+new_view_pool = {}
 MAX_COUNT = 5
 
 class GrepCommand(sublime_plugin.WindowCommand):

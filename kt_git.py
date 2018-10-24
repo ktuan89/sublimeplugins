@@ -25,7 +25,7 @@ def gitPath(window):
 def gitWebBlameUrl():
     return gitSettings().get('web_blame_url')
 
-new_view_pool = []
+new_view_pool = {}
 MAX_COUNT = 5
 
 class KtGitBase(sublime_plugin.WindowCommand):
