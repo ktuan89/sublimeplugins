@@ -125,6 +125,10 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
                 self.is_file.append(False)
                 self.actual_path.append(None)
 
+                self.files.append("#")
+                self.is_file.append(False)
+                self.actual_path.append(None)
+
         bookmarks = bookmarkPaths()
         for name in bookmarks:
             path = bookmarks[name]
@@ -151,15 +155,33 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
                 open_file_in_window(self.window, path_to_open)
             else:
                 path_to_open = None
+                should_open_project = False
                 if self.actual_path[selected]:
                     path_to_open = self.actual_path[selected]
                 else:
                     folder = self.files[selected]
-                    if folder == "`":
-                        folder = ".."
-                    path_to_open = os.path.join(self.mypath, folder)
-                self.mypath = path_to_open
-                sublime.set_timeout_async(self.open_for_current_path, 50)
+                    if folder == "#":
+                        should_open_project = True
+                        path_to_open = self.mypath
+                    else:
+                        if folder == "`":
+                            folder = ".."
+                        path_to_open = os.path.join(self.mypath, folder)
+
+                if should_open_project:
+                    current_project_data = self.window.project_data()
+                    if current_project_data is None:
+                        current_project_data = {
+                            'folders': [{'path': path_to_open}]
+                        }
+                    elif not current_project_data.get('folders'):
+                        current_project_data['folders'] = [{'path': path_to_open}]
+                    else:
+                        current_project_data['folders'].append([{'path': path_to_open}])
+                    self.window.set_project_data(current_project_data)
+                else:
+                    self.mypath = path_to_open
+                    sublime.set_timeout_async(self.open_for_current_path, 50)
 
         return selected
 
