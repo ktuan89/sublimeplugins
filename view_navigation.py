@@ -177,7 +177,7 @@ class InFolderSwitcher(sublime_plugin.WindowCommand):
                     elif not current_project_data.get('folders'):
                         current_project_data['folders'] = [{'path': path_to_open}]
                     else:
-                        current_project_data['folders'].append([{'path': path_to_open}])
+                        current_project_data['folders'].append({'path': path_to_open})
                     self.window.set_project_data(current_project_data)
                 else:
                     self.mypath = path_to_open
