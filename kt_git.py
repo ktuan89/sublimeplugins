@@ -37,6 +37,7 @@ class KtGitBase(sublime_plugin.WindowCommand):
         return ""
 
     def run(self, param=None):
+        git_path = gitPath(self.window)
         stdout, _ = run_bash_for_output(self.gitCommand(param))
 
         global new_view_pool
@@ -45,6 +46,7 @@ class KtGitBase(sublime_plugin.WindowCommand):
         results_view.set_syntax_file('Packages/Diff/Diff.tmLanguage')
 
         results_view.set_name(self.gitName())
+        results_view.settings().set('kt_git_path', git_path)
 
         # deps: this is from utilities.py
         results_view.run_command('replace_content', {"new_content": stdout})
@@ -85,6 +87,9 @@ class KtGitDiffOpen(sublime_plugin.WindowCommand):
 
     def run(self):
         view = self.window.active_view()
+        override_git_path = gitPath(self.window)
+        if view.settings().get('kt_git_path'):
+            override_git_path = view.settings().get('kt_git_path')
         if view.name().startswith("Git") or (view.file_name() is not None and view.file_name().endswith("diff")):
 
             pos = self.positionFromView(view)
@@ -122,7 +127,7 @@ class KtGitDiffOpen(sublime_plugin.WindowCommand):
             if binary_file_str != "":
                 matches = re.search(r'a\/([^\s]+)', binary_file_str[len("diff --git"):])
                 file_name = matches.group(1)
-                open_file_in_window(self.window, gitPath(self.window) + file_name.strip())
+                open_file_in_window(self.window, override_git_path + file_name.strip())
                 return
 
             if file_str == "" or position_str == "":
@@ -132,7 +137,7 @@ class KtGitDiffOpen(sublime_plugin.WindowCommand):
             matches = re.search('@@.*\+(.*),(.*) @@', position_str)
             extract_position = (int(matches.group(1)) - 1) + (line_count - 1)
 
-            new_view = open_file_in_window(self.window, gitPath(self.window) + file_name.strip())
+            new_view = open_file_in_window(self.window, override_git_path + file_name.strip())
 
             def handle_view():
                 new_position = new_view.text_point(extract_position, line_offset)
