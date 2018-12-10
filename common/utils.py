@@ -6,6 +6,13 @@ import codecs
 
 from os.path import expanduser
 
+
+def fix_command_str_if_windows(s):
+    if sublime.platform() == "windows":
+        return s.replace("'", "\"").replace(";", " &&")
+    else:
+        return s
+
 def wait_for_view_to_be_loaded_then_do(view, func):
 
     def wait_for_view_to_be_loaded_then_do_exp(view, func, timeout):
@@ -30,7 +37,7 @@ def git_path_for_window(window):
             if folder.startswith(saved_git_folder):
                 return saved_git_folder
 
-        while folder != "/":
+        while folder != "/" and len(folder) > 3:
             git_folder = os.path.abspath(os.path.join(folder, ".git"))
             if os.path.isdir(git_folder):
                 final_folder = os.path.join(folder, '')
@@ -47,6 +54,8 @@ def git_path_for_window(window):
         return path
     # intentionally keep random result to avoid harming the file system although
     # we are running a `git grep` command in here and the command is read-only
+    if sublime.platform() == "windows":
+        return "C:\\R_A__N_D___O_M_F_I___L__E\\"
     return "/R_A__N_D___O_M_F_I___L__E/"
 
 def dequeue_view(window, pool, count):
@@ -67,7 +76,10 @@ def dequeue_view(window, pool, count):
     return view
 
 def run_bash_for_output(command):
-    p = Popen(command, shell=True, close_fds=True,
+    close_fds = True
+    if sublime.platform() == "windows":
+        close_fds = False
+    p = Popen(command, shell=True, close_fds=close_fds,
                   stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
     output, err = p.communicate()

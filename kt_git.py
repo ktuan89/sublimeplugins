@@ -12,6 +12,7 @@ from .common.utils import git_path_for_window
 from .common.utils import run_bash_for_output
 from .common.utils import dequeue_view
 from .common.utils import open_file_in_window
+from .common.utils import fix_command_str_if_windows
 
 def gitSettings():
     return sublime.load_settings('Git.sublime-settings')
@@ -57,21 +58,21 @@ class KtGitBase(sublime_plugin.WindowCommand):
 class KtGitShow(KtGitBase):
     def gitCommand(self, param=None):
         if param is None:
-            return "cd '{0}';git show".format(gitPath(self.window))
+            return fix_command_str_if_windows("cd '{0}';git show").format(gitPath(self.window))
         else:
-            return "cd '{0}';git show {1}".format(gitPath(self.window), param)
+            return fix_command_str_if_windows("cd '{0}';git show {1}").format(gitPath(self.window), param)
     def gitName(self):
         return "GitShow"
 
 class KtGitStatus(KtGitBase):
     def gitCommand(self, param=None):
-        return "cd '{0}';git status".format(gitPath(self.window))
+        return fix_command_str_if_windows("cd '{0}';git status").format(gitPath(self.window))
     def gitName(self):
         return "GitStatus"
 
 class KtGitDiff(KtGitBase):
     def gitCommand(self, param=None):
-        return "cd '{0}';git diff".format(gitPath(self.window))
+        return fix_command_str_if_windows("cd '{0}';git diff").format(gitPath(self.window))
     def gitName(self):
         return "GitDiff"
 
@@ -159,7 +160,7 @@ class KtGitListModifiedFiles(sublime_plugin.WindowCommand):
     files = []
 
     def run(self):
-        command = "cd '{0}';git status".format(gitPath(self.window))
+        command = fix_command_str_if_windows("cd '{0}';git status").format(gitPath(self.window))
         p = Popen(command, shell=True, close_fds=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
         p.wait()
@@ -316,7 +317,7 @@ class KtGitBlame(sublime_plugin.TextCommand):
         current_path = self.view.file_name()
         if current_path is not None and current_path.startswith(path):
             remaining_path = current_path[len(path):]
-            command = ("cd '{0}';git blame --show-email '{1}'").format(path, remaining_path)
+            command = fix_command_str_if_windows("cd '{0}';git blame --show-email '{1}'").format(path, remaining_path)
 
             output, _ = run_bash_for_output(command)
             lines = output.split('\n')

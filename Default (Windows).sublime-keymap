@@ -1,0 +1,56 @@
+[
+    { "keys": ["alt+shift+t"], "command": "grep", "args": {"ask": true,  "show_in_view": true} },
+    { "keys": ["ctrl+enter"],    "command": "grep", "args": {"ask": false, "show_in_view": false} },
+    { "keys": ["alt+ctrl+\\"], "command": "grep", "args": {
+        "ask": false,
+        "show_in_view": false,
+        "duplicate_results": true,
+        "grep_command": "cd \"{0}\" && git grep -n {1} ."
+    } },
+
+    { "keys": ["alt+shift+j"], "command": "reveal_in_side_bar" },
+    { "keys": ["alt+shift+f"], "command": "filter_text"},
+    { "keys": ["ctrl+0"], "command": "open_in_finder"},
+    { "keys": ["ctrl+9"], "command": "open_in_terminal"},
+
+    { "keys": ["ctrl+o"], "command": "open_file_in_xcode" },
+
+    { "keys": ["ctrl+b"], "command": "run_bash" },
+
+    { "keys": ["ctrl+["], "command": "start_selection"},
+    { "keys": ["ctrl+]"], "command": "end_selection"},
+
+    { "keys": ["alt+c"], "command": "copy_current_word" },
+    { "keys": ["ctrl+;"], "command": "align_colon" },
+
+    { "keys": ["alt+shift+o"], "command": "extended_switcher_haha", "args": {"list_mode": "window"} },
+    { "keys": ["ctrl+\\"], "command": "jump_to_appearances"},
+    { "keys": ["ctrl+e"], "command": "go_to_same_word", "args": {"reverse": false}},
+    // { "keys": ["ctrl+w"], "command": "go_to_same_word", "args": {"reverse": true}},
+    { "keys": ["ctrl+r"], "command": "replace_all_appearances"},
+
+    { "keys": ["ctrl+g", "d"], "command": "kt_git_diff"},
+    { "keys": ["ctrl+g", "s"], "command": "kt_git_show"},
+    { "keys": ["ctrl+g", "g"], "command": "kt_git_status"},
+    { "keys": ["ctrl+g", "o"], "command": "kt_git_list_modified_files"},
+    { "keys": ["ctrl+g", "a"], "command": "kt_git_add"},
+    { "keys": ["ctrl+g", "b"], "command": "kt_git_blame"},
+    { "keys": ["ctrl+g", "r"], "command": "kt_git_blame_remove"},
+    { "keys": ["ctrl+g", "c"], "command": "kt_git_list_recent_commits"},
+    { "keys": ["ctrl+g", "f"], "command": "kt_git_view_current_file_from_commit"},
+    { "keys": ["alt+shift+b"], "command": "kt_git_blame_in_browser" },
+    { "keys": ["alt+shift+\\"], "command": "kt_git_diff_open" },
+
+    { "keys": ["alt+shift+i"], "command": "in_folder_switcher"},
+    { "keys": ["alt+ctrl+s"], "command": "grep_replace_save" },
+
+    { "keys": ["alt+1"], "command": "jump_to_kth_view", "args": {"index": 1}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["alt+2"], "command": "jump_to_kth_view", "args": {"index": 2}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["alt+3"], "command": "jump_to_kth_view", "args": {"index": 3}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["alt+4"], "command": "jump_to_kth_view", "args": {"index": 4}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["alt+5"], "command": "jump_to_kth_view", "args": {"index": 5}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["alt+6"], "command": "jump_to_kth_view", "args": {"index": 6}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["alt+7"], "command": "jump_to_kth_view", "args": {"index": 7}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["alt+8"], "command": "jump_to_kth_view", "args": {"index": 8}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+    { "keys": ["alt+9"], "command": "jump_to_kth_view", "args": {"index": 9}, "context": [{"key": "setting.use_recent_file_navigation"}] },
+]
