@@ -404,3 +404,17 @@ class KtGitBlameInBrowser(sublime_plugin.TextCommand):
             print(remaining_path,' ', current_path, ' ', path)
             link = gitWebBlameUrl().format(remaining_path)
             webbrowser.open_new(link)
+
+class OpenCommandsHook(sublime_plugin.EventListener):
+    def on_window_command(self, window, command_name, args):
+        if command_name == "kt_git_diff_open":
+            view = window.active_view()
+            for region in view.sel():
+                if region.empty():
+                    line = view.substr(view.line(region.begin()))
+                    commit_prefix = "commit "
+                    if line.startswith(commit_prefix):
+                        commit_hash = line[len(commit_prefix):]
+                        # TODO: make it configurable
+                        link = gitWebBlameUrl().replace("blob/master/", "commit/").format(commit_hash)
+                        webbrowser.open_new(link)
