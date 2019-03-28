@@ -33,7 +33,10 @@ def split_positions_from_file_path(str):
 def row_col_from_positions(str):
     numbers = str.split(":")
     if len(numbers) > 1 and len(numbers[0]) > 0 and len(numbers[1]) > 0:
-        return (int(numbers[0]), int(numbers[1]))
+        try:
+            return (int(numbers[0]), int(numbers[1]))
+        except ValueError:
+            return (int(numbers[0]), 1)
     elif len(numbers) > 0 and len(numbers[0]) > 0:
         return (int(numbers[0]), 1)
     else:
