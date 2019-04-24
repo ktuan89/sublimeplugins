@@ -1,0 +1,3 @@
+[
+    { "caption": "Backup: Save a backup for unsaved buffers", "command": "store_backup_unsaved_buffer" },
+]
