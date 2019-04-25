@@ -25,6 +25,6 @@ class StoreBackupUnsavedBuffer(sublime_plugin.ApplicationCommand):
                     content_hash = content_hash.hexdigest()[:10]
                     file_path = os.path.join(path, content_hash)
 
-                    text_file = open(file_path + ".txt", "w")
+                    text_file = open(file_path + ".txt", "w", encoding='utf-8')
                     text_file.write(content)
                     text_file.close()
